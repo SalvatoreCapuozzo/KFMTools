@@ -1,0 +1,8 @@
+Buffalo 
+Cat
+Cow 
+Dog
+Goat
+Horse
+Pig
+Sheep

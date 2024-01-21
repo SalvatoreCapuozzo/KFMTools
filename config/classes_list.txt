@@ -1,0 +1,20 @@
+Select the class
+strongili 
+eimeria_spp 
+fasciola 
+eimeria_intricata
+calicophoron
+dictyocaulus
+nematodirus
+bubble
+dirt
+dicrocoelium
+metastrongili
+trichuris
+skrjabinema
+toxocara
+strongyloides
+moniezia_expansa
+moniezia_benedeni
+capillaria
+giardia
