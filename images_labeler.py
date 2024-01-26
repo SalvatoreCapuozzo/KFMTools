@@ -427,6 +427,9 @@ def load():
     if image_path[:5] == "micro":
         file_name = folder_base_name+"_"+image_path[:-4]+".txt" #image_path[:-4]+".txt"
         focus_file_name = folder_base_name+"_"+image_path[:-4]+"_focus.txt"
+        if not os.path.exists(os.path.join(labels_path,file_name)):
+            file_name = image_path[:-4]+".txt"
+            focus_file_name = image_path[:-4]+"_focus.txt"
     else:
         file_name = image_path[:-4]+".txt"
         focus_file_name = image_path[:-4]+"_focus.txt"

@@ -66,6 +66,8 @@ def createXMLFile():
     global apparatus
     xmlText = f"<Scan><ScanID>{session}</ScanID><Name>{name}</Name><ProprietaryName>{prop}</ProprietaryName><Applicant>{appl}</Applicant><Laboratory>{lab}</Laboratory><Technician>{tech}</Technician><SelectedSpecies>{host}</SelectedSpecies><StartDateTime>1976-05-30T12:07:41.643Z</StartDateTime><SelectedMethod>{apparatus}</SelectedMethod><ScanStatus>finished</ScanStatus><CreatedAt>2023-06-06T14:49:14.9895718Z</CreatedAt></Scan>"
 
+    if not os.path.exists(os.path.join(get_correct_path("sessions"))):
+        os.mkdir(os.path.join(get_correct_path("sessions")))
     if not os.path.exists(os.path.join(get_correct_path("sessions"),session)):
         os.mkdir(os.path.join(get_correct_path("sessions"),session))
     with open(os.path.join(get_correct_path("sessions"),session,f'{session}.xml'), 'w') as f:
@@ -135,6 +137,7 @@ def samples_scanner():
     #remotepath = "/datadrive/home/Antonio/scan_data/svm.png"
 
     ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
     ssh.connect(server, username=user, pkey = k )
 
@@ -230,16 +233,18 @@ def samples_scanner():
         global lb3
         session = t0.get("1.0", "end-1c")
         print(session)
+        lb3.config(text="Loading...")
         try:
-            lb3.config(text="Loading...")
             sftp = ssh.open_sftp()
             sftp.get(f"{output_path}/{session}/{session}_report.pdf", os.path.join(get_correct_path("sessions"),session,f"{session}_report.pdf"))
             sftp.get(f"{output_path}/{session}/{session}_inference.json", os.path.join(get_correct_path("sessions"),session,f"{session}_inference.json"))
             if not os.path.exists(os.path.join(get_correct_path("sessions"),session,"labels")):
                 os.mkdir(os.path.join(get_correct_path("sessions"),session,"labels"))
-            for path, files in sftp_walk(sftp,f"{output_path}/{session}/{session}_DetectionOutput/labels"):
+            for path, files in sftp_walk(sftp,f"/datadrive/home/Antonio/scan_data/{session}/{session}_DetectionOutput/labels"):
                 for file in files:
-                    sftp.get(os.path.join(path,file), os.path.join(get_correct_path("sessions"),session,"labels",file))
+                    if not os.path.exists(os.path.join(get_correct_path("sessions"),session,"labels")):
+                        os.mkdir(os.path.join(get_correct_path("sessions"),session,"labels"))
+                    sftp.get(f"/datadrive/home/Antonio/scan_data/{session}/{session}_DetectionOutput/labels"+"/"+file, os.path.join(get_correct_path("sessions"),session,"labels",file))
             lb3.config(text="Report downloaded successfully")
         except Exception as e:
             lb3.config(text=e)
@@ -264,10 +269,12 @@ def samples_scanner():
             sftp.get(f"{output_path}/{session}/{session}_inference.json", os.path.join(get_correct_path("sessions"),session,f"{session}_inference.json"))
             if not os.path.exists(os.path.join(get_correct_path("sessions"),session,"labels")):
                 os.mkdir(os.path.join(get_correct_path("sessions"),session,"labels"))
-            for path, files in sftp_walk(sftp,f"{output_path}/{session}/{session}_DetectionOutput/labels"):
+            for path, files in sftp_walk(sftp,f"/datadrive/home/Antonio/scan_data/{session}/{session}_DetectionOutput/labels"):
                 for file in files:
-                    sftp.get(os.path.join(path,file), os.path.join(get_correct_path("sessions"),session,"labels",file))
-            lb2.config(text="Report downloaded successfully")
+                    if not os.path.exists(os.path.join(get_correct_path("sessions"),session,"labels")):
+                        os.mkdir(os.path.join(get_correct_path("sessions"),session,"labels"))
+                    sftp.get(f"/datadrive/home/Antonio/scan_data/{session}/{session}_DetectionOutput/labels"+"/"+file, os.path.join(get_correct_path("sessions"),session,"labels",file))
+            lb3.config(text="Report downloaded successfully")
         except Exception as e:
             lb2.config(text=e)
             print(e)
@@ -289,45 +296,45 @@ def samples_scanner():
 
     # Create label
     l0 = tk.Label(root, text = "Scan Session Name")
-    l0.config(font =("Courier", 14))
+    l0.config(font =("Courier", 10))
 
     # Create text widget and specify size.
-    t0 = tk.Text(root, height = 4, width = 52)
+    t0 = tk.Text(root, height = 1, width = 52)
     
     # Create label
     l1 = tk.Label(root, text = "Name")
-    l1.config(font =("Courier", 14))
+    l1.config(font =("Courier", 10))
 
     # Create text widget and specify size.
-    t1 = tk.Text(root, height = 4, width = 52)
+    t1 = tk.Text(root, height = 1, width = 52)
 
     # Create label
     l2 = tk.Label(root, text = "Proprietary")
-    l2.config(font =("Courier", 14))
+    l2.config(font =("Courier", 10))
 
     # Create text widget and specify size.
-    t2 = tk.Text(root, height = 4, width = 52)
+    t2 = tk.Text(root, height = 1, width = 52)
 
     # Create label
     l3 = tk.Label(root, text = "Applicant")
-    l3.config(font =("Courier", 14))
+    l3.config(font =("Courier", 10))
 
     # Create text widget and specify size.
-    t3 = tk.Text(root, height = 4, width = 52)
+    t3 = tk.Text(root, height = 1, width = 52)
 
     # Create label
     l4 = tk.Label(root, text = "Laboratory")
-    l4.config(font =("Courier", 14))
+    l4.config(font =("Courier", 10))
 
     # Create text widget and specify size.
-    t4 = tk.Text(root, height = 4, width = 52)
+    t4 = tk.Text(root, height = 1, width = 52)
 
     # Create label
     l5 = tk.Label(root, text = "Technician")
-    l5.config(font =("Courier", 14))
+    l5.config(font =("Courier", 10))
 
     # Create text widget and specify size.
-    t5 = tk.Text(root, height = 4, width = 52)
+    t5 = tk.Text(root, height = 1, width = 52)
 
     # Create label
     l6 = tk.Label(root, text = "Host")
