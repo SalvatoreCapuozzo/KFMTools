@@ -66,6 +66,31 @@ def is_valid(x):
 #def display_selected(choice):
 #    choice = imgNameVariable.get()
 
+def changeImageName():
+    full_file_path = path.split("/")
+    folder_base_name = os.path.basename(os.path.dirname(folder_path))
+    #labels_path = get_correct_path("labels")
+    #images_path = get_correct_path("images")
+    #focus_labels_path = get_correct_path("focus_labels")
+    labels_path = os.path.join(os.path.dirname(folder_path),"labels")
+    images_path = os.path.join(os.path.dirname(folder_path),"images")
+    focus_labels_path = os.path.join(os.path.dirname(folder_path),"focus_labels")
+
+    if image_path[:5] == "micro":
+        file_name = folder_base_name+"_"+image_path[:-4]+".txt" #image_path[:-4]+".txt"
+        focus_file_name = folder_base_name+"_"+image_path[:-4]+"_focus.txt"
+        img_file_name = folder_base_name+"_"+image_path
+    else:
+        file_name = image_path[:-4]+".txt"
+        focus_file_name = image_path[:-4]+"_focus.txt"
+        img_file_name = image_path
+
+    if os.path.join(folder_path,full_file_path[-1],image_path) != os.path.join(images_path,img_file_name):
+        shutil.copyfile(os.path.join(folder_path,full_file_path[-1],image_path), os.path.join(images_path,img_file_name))
+
+    if image_path[:5] == "micro":
+        os.remove(os.path.join(folder_path,full_file_path[-1],image_path))
+
 #APERTURA FINESTRA LABELING
 def master(folder_path): 
     global rect_id, index, folder_size, newWindow, image_width, image_height, canvas, variable, focusVariable, image_path, incremental_id, classes_list, colors_list, focus_list, l, images_list, imgNameVariable
@@ -75,8 +100,6 @@ def master(folder_path):
     folder_size = len(pathList)
     attempt = 0
     incremental_id = 0
-    #image_width = img.width()
-    #image_height = img.height()
     images_list = pathList
 
     try:
@@ -92,6 +115,36 @@ def master(folder_path):
     except Exception as e:
         print(e)
         l.config(text=e)
+
+    changeImageName()
+
+    pathList = sorted(os.listdir(folder_path))
+    pathList = list(filter(is_valid, pathList))
+    folder_size = len(pathList)
+    attempt = 0
+    incremental_id = 0
+    images_list = pathList
+
+    try:
+        image_path = pathList[index]
+        while image_path[-4:] != ".png" and image_path[-4:] != ".jpg" and image_path[-4:] != ".jpeg":
+            index = (index+1)%folder_size
+            attempt += 1
+            if attempt > 20:
+                raise Exception("There is no valid image in this folder")
+            image_path = pathList[index]
+
+        path = os.path.join(folder_path,image_path)
+    except Exception as e:
+        print(e)
+        l.config(text=e)
+
+    pathList = sorted(os.listdir(folder_path))
+    pathList = list(filter(is_valid, pathList))
+    folder_size = len(pathList)
+    attempt = 0
+    incremental_id = 0
+    images_list = pathList
 
     try:
         #CREAZIONE DELLA FINESTRA
@@ -113,7 +166,7 @@ def master(folder_path):
         canvas = tk.Canvas(newWindow, width=img.width(), height=img.height(),
                     borderwidth=0, highlightthickness=0)
         #canvas.pack(expand=True)
-        canvas.place(x=0,y=60)
+        canvas.place(x=5,y=60)
         canvas.img = img
         canvas.create_image(0, 0, image=img, anchor=tk.NW)
 
@@ -137,8 +190,11 @@ def master(folder_path):
         canvas.bind("<ButtonRelease>", on_release)
         newWindow.bind('<KeyPress>', on_key_press)
 
+        idx = 0
+        if variable != None:
+            idx = classes_list.index(variable.get())
         variable = tk.StringVar(newWindow)
-        variable.set(classes_list[0])
+        variable.set(classes_list[idx])
         w = tk.OptionMenu(newWindow, variable, *classes_list)
         w.place(x=740, y=2)
         var = variable.get()
@@ -305,10 +361,10 @@ def on_release(event):
         
         obj_text = tk.Label(newWindow, text=text)
         obj_text.config(font =("Courier", 10))
-        obj_text.place(x=frame_width+50, y=(incremental_id)*25+55)
+        obj_text.place(x=frame_width+55, y=(incremental_id)*25+55)
         obj_texts.append(obj_text)
         obj_button = tk.Button(newWindow, text="X", command=lambda r=rect_id, t=text_id, o=obj_text, j=obj: remove_obj(r,t,o,j))
-        obj_button.place(x=frame_width, y=(incremental_id)*25+50)
+        obj_button.place(x=frame_width+5, y=(incremental_id)*25+50)
         obj_buttons.append(obj_button)
         incremental_id += 1
         
@@ -410,7 +466,7 @@ def load():
     objects_list.clear()
     incremental_id = 0
 
-    folder_base_name = os.path.basename(folder_path)
+    folder_base_name = os.path.basename(os.path.dirname(folder_path))
     labels_path = os.path.join(os.path.dirname(folder_path),"labels")
     images_path = os.path.join(os.path.dirname(folder_path),"images")
     focus_labels_path = os.path.join(os.path.dirname(folder_path),"focus_labels")
@@ -472,18 +528,16 @@ def load():
                     
                     obj_text = tk.Label(newWindow, text=text)
                     obj_text.config(font =("Courier", 10))
-                    obj_text.place(x=frame_width+50, y=(incremental_id)*25+55)
+                    obj_text.place(x=frame_width+55, y=(incremental_id)*25+55)
                     obj_texts.append(obj_text)
                     
                     obj_button = tk.Button(newWindow, text="X", command=lambda r=rect_id, t=text_id, o=obj_text, j=obj: remove_obj(r,t,o,j))
-                    obj_button.place(x=frame_width, y=(incremental_id)*25+50)
+                    obj_button.place(x=frame_width+5, y=(incremental_id)*25+50)
                     obj_buttons.append(obj_button)
                     incremental_id += 1
     
 def save():
     global image_width, image_height, image_path
-    full_file_path = path.split("/")
-    folder_base_name = os.path.basename(folder_path)
     #labels_path = get_correct_path("labels")
     #images_path = get_correct_path("images")
     #focus_labels_path = get_correct_path("focus_labels")
@@ -497,17 +551,18 @@ def save():
     if not os.path.exists(focus_labels_path):
         os.mkdir(focus_labels_path)
     
-    #file_name = folder_base_name+"_"+image_path[:-4]+".txt"
-    #focus_file_name = folder_base_name+"_"+image_path[:-4]+"_focus.txt"
-    #img_file_name = folder_base_name+"_"+image_path
-    if image_path[:5] == "micro":
-        file_name = folder_base_name+"_"+image_path[:-4]+".txt" #image_path[:-4]+".txt"
-        focus_file_name = folder_base_name+"_"+image_path[:-4]+"_focus.txt"
-        img_file_name = folder_base_name+"_"+image_path
-    else:
-        file_name = image_path[:-4]+".txt"
-        focus_file_name = image_path[:-4]+"_focus.txt"
-        img_file_name = image_path
+    file_name = image_path[:-4]+".txt"
+    focus_file_name = image_path[:-4]+"_focus.txt"
+    img_file_name = image_path
+    
+    #if image_path[:5] == "micro":
+    #    file_name = folder_base_name+"_"+image_path[:-4]+".txt" #image_path[:-4]+".txt"
+    #    focus_file_name = folder_base_name+"_"+image_path[:-4]+"_focus.txt"
+    #    img_file_name = folder_base_name+"_"+image_path
+    #else:
+    #    file_name = image_path[:-4]+".txt"
+    #    focus_file_name = image_path[:-4]+"_focus.txt"
+    #    img_file_name = image_path
     
     #path_string = full_file_path[-1].split(".")
     output_string = ""
@@ -531,8 +586,11 @@ def save():
         focus_output_file.write(focus_output_string)
         focus_output_file.close()
     
-    if os.path.join(folder_path,full_file_path[-1],image_path) != os.path.join(images_path,img_file_name):
-        shutil.copyfile(os.path.join(folder_path,full_file_path[-1],image_path), os.path.join(images_path,img_file_name))
+    #if os.path.join(folder_path,full_file_path[-1],image_path) != os.path.join(images_path,img_file_name):
+    #    shutil.copyfile(os.path.join(folder_path,full_file_path[-1],image_path), os.path.join(images_path,img_file_name))
+
+    #if image_path[:5] == "micro":
+    #    os.remove(os.path.join(folder_path,full_file_path[-1],image_path))
 
     if len(objects_list) == 0:
         if os.path.exists(os.path.join(labels_path,file_name)):

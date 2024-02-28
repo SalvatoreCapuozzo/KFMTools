@@ -1,6 +1,6 @@
 Buffalo 
 Cat
-Cow 
+Cattle 
 Dog
 Goat
 Horse

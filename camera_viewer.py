@@ -46,7 +46,7 @@ def master(folder_path):
                 image_height = data.shape[0]
                 image_width = data.shape[1]
 
-                col_idx = int(file.split('_')[1])
+                #col_idx = int(file.split('_')[1])
             
                 if np.any(full_image):
                     full_image = np.concatenate([full_image, data], axis=0)
