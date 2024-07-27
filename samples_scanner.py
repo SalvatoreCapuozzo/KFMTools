@@ -236,6 +236,8 @@ def samples_scanner():
         lb3.config(text="Loading...")
         try:
             sftp = ssh.open_sftp()
+            if not os.path.exists(os.path.join(get_correct_path("sessions"),session)):
+                os.mkdir(os.path.join(get_correct_path("sessions"),session))
             sftp.get(f"{output_path}/{session}/{session}_report.pdf", os.path.join(get_correct_path("sessions"),session,f"{session}_report.pdf"))
             sftp.get(f"{output_path}/{session}/{session}_inference.json", os.path.join(get_correct_path("sessions"),session,f"{session}_inference.json"))
             if not os.path.exists(os.path.join(get_correct_path("sessions"),session,"labels")):
@@ -265,6 +267,8 @@ def samples_scanner():
             else:
                 print("Error", exit_status)
             sftp = ssh.open_sftp()
+            if not os.path.exists(os.path.join(get_correct_path("sessions"),session)):
+                os.mkdir(os.path.join(get_correct_path("sessions"), session))
             sftp.get(f"{output_path}/{session}/{session}_report.pdf", os.path.join(get_correct_path("sessions"),session,f"{session}_report.pdf"))
             sftp.get(f"{output_path}/{session}/{session}_inference.json", os.path.join(get_correct_path("sessions"),session,f"{session}_inference.json"))
             if not os.path.exists(os.path.join(get_correct_path("sessions"),session,"labels")):

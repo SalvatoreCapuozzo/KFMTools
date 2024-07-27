@@ -63,16 +63,19 @@ def master(folder_path):
     global rect_id, index, folder_size, newWindow, image_width, image_height, canvas, variable, image_path, incremental_id, classes_list, colors_list, l, imgNameVariable, images_list
 
     session_name = os.path.basename(folder_path)
-    zip_file = os.path.join(folder_path,session_name+".zip")
-    labels_folder = os.path.join(folder_path,"labels")
-    images_folder = os.path.join(folder_path,session_name)
+    #zip_file = os.path.join(folder_path,session_name+".zip")
+    pred_labels_folder = os.path.join(folder_path,session_name+"_DetectionOutput","labels")
+    gt_labels_folder = os.path.join(folder_path,"labels")
+    images_folder = os.path.join(folder_path,"images")
 
+    """
     if not os.path.exists(images_folder):
         # loading the temp.zip and creating a zip object 
         with ZipFile(zip_file, 'r') as zObject: 
             # Extracting all the members of the zip  
             # into a specific location. 
             zObject.extractall(path=images_folder)
+    """
 
     
     pathList = sorted(os.listdir(images_folder))
@@ -346,52 +349,63 @@ def load():
     folder_base_name = os.path.basename(folder_path)
 
     file_name = image_path[:-4]+".txt"
-    print(file_name)
-    label_exists = os.path.exists(os.path.join(folder_path,"labels",file_name))
-    if label_exists:
-        file_path = os.path.join(folder_path,"labels",file_name)
-        with open(file_path, 'r') as input_file:
-            obj_lines = input_file.readlines()
-            for line in obj_lines:
-                if line != "":
-                    obj_list = line.replace("\n","").split(" ")
-                    class_id = int(obj_list[0])
-                    x_center = int(float(obj_list[1])*float(image_width))
-                    y_center = int(float(obj_list[2])*float(image_height))
-                    delta_width = int(float(obj_list[3])*float(image_width))
-                    delta_height = int(float(obj_list[4])*float(image_height))
-                    x_min = x_center - delta_width/2
-                    y_min = y_center - delta_height/2
-                    default_class = "C"
-                    obj = LabeledObject(class_id,x_min,y_min,x_min+delta_width,y_min+delta_height,default_class)
-                    objects_list.append(obj)
-                    class_name = classes_list[class_id]
-                    color = colors_list[class_id]
-                    rect_id = canvas.create_rectangle(x_min, y_min, x_min+delta_width, y_min+delta_height, dash=(2,2), fill='', outline=color,width=3)
-                    rects.append(rect_id)
+    gt_labels_path = os.path.join(folder_path,"labels",file_name)
+    pred_labels_path = os.path.join(folder_path,folder_base_name+"_DetectionOutput","labels",file_name)
+    labels_list = [pred_labels_path, gt_labels_path]
+    for labels_path in labels_list:
+        label_exists = os.path.exists(labels_path)
+        if label_exists:
+            file_path = labels_path
+            with open(file_path, 'r') as input_file:
+                obj_lines = input_file.readlines()
+                for line in obj_lines:
+                    if line != "":
+                        obj_list = line.replace("\n","").split(" ")
+                        class_id = int(obj_list[0])
+                        x_center = int(float(obj_list[1])*float(image_width))
+                        y_center = int(float(obj_list[2])*float(image_height))
+                        delta_width = int(float(obj_list[3])*float(image_width))
+                        delta_height = int(float(obj_list[4])*float(image_height))
+                        x_min = x_center - delta_width/2
+                        y_min = y_center - delta_height/2
+                        default_class = "C"
+                        obj = LabeledObject(class_id,x_min,y_min,x_min+delta_width,y_min+delta_height,default_class)
+                        objects_list.append(obj)
+                        class_name = classes_list[class_id]
+                        color = colors_list[class_id]
+                        if labels_path == pred_labels_path:
+                            rect_id = canvas.create_rectangle(x_min, y_min, x_min+delta_width, y_min+delta_height, dash=(2,2), fill='', outline=color,width=3)
+                            rects.append(rect_id)
+                        else:
+                            rect_id = canvas.create_rectangle(x_min, y_min, x_min+delta_width, y_min+delta_height, dash=(1,11), fill='', outline="black",width=3)
+                            rect_id = canvas.create_rectangle(x_min, y_min, x_min+delta_width, y_min+delta_height, dash=(1,11), fill='', outline=color,width=3, dashoffset=6)
 
-                    text = "[ID: "+str(incremental_id)+"] C: "+str(class_id)
-                    text_id = canvas.create_text(x_min, y_min, text=text, fill="black", font=('Helvetica 12 bold'))
-                    texts.append(text_id)
-                    
-                    obj_text = tk.Label(newWindow, text=text+", "+str(default_class))
-                    obj_text.config(font =("Courier", 10))
-                    obj_text.place(x=frame_width, y=(incremental_id)*25+55)
-                    obj_texts.append(obj_text)
-                    
-                    c_obj_button = tk.Button(newWindow, text="C", highlightbackground="green", command=lambda s="C", o=obj_text, j=obj: set_as(s,o,j))
-                    c_obj_button.place(x=1360, y=(incremental_id)*25+50)
-                    c_obj_buttons.append(c_obj_button)
+                        if labels_path == pred_labels_path:
+                            text = "[PredID: "+str(incremental_id)+"]"
+                            text_id = canvas.create_text(x_min, y_min-10, text=text, fill="gray", font=('Helvetica 12 bold'))
+                            texts.append(text_id)
+                            
+                            obj_text_str = "[PredID: "+str(incremental_id)+"] "+class_name+" (C: "+str(class_id)+")"
+                            obj_text = tk.Label(newWindow, text=obj_text_str+", "+str(default_class))
+                            obj_text.config(font =("Courier", 10))
+                            obj_text.place(x=frame_width, y=(incremental_id)*25+55)
+                            obj_texts.append(obj_text)
+                            
+                            c_obj_button = tk.Button(newWindow, text="C", highlightbackground="green", command=lambda s="C", o=obj_text, j=obj: set_as(s,o,j))
+                            c_obj_button.place(x=1360, y=(incremental_id)*25+50)
+                            c_obj_buttons.append(c_obj_button)
 
-                    w_obj_button = tk.Button(newWindow, text="W", highlightbackground="red", command=lambda s="W", o=obj_text, j=obj: set_as(s,o,j))
-                    w_obj_button.place(x=1410, y=(incremental_id)*25+50)
-                    w_obj_buttons.append(w_obj_button)
+                            w_obj_button = tk.Button(newWindow, text="W", highlightbackground="red", command=lambda s="W", o=obj_text, j=obj: set_as(s,o,j))
+                            w_obj_button.place(x=1410, y=(incremental_id)*25+50)
+                            w_obj_buttons.append(w_obj_button)
 
-                    m_obj_button = tk.Button(newWindow, text="FP", highlightbackground="blue", command=lambda s="FP", o=obj_text, j=obj: set_as(s,o,j))
-                    m_obj_button.place(x=1460, y=(incremental_id)*25+50)
-                    m_obj_buttons.append(m_obj_button)
+                            m_obj_button = tk.Button(newWindow, text="FP", highlightbackground="blue", command=lambda s="FP", o=obj_text, j=obj: set_as(s,o,j))
+                            m_obj_button.place(x=1460, y=(incremental_id)*25+50)
+                            m_obj_buttons.append(m_obj_button)
 
-                    incremental_id += 1
+                            incremental_id += 1
+        else:
+            print("Labels file "+labels_path+" does not exist")
     
 def save():
     global image_width, image_height, image_path

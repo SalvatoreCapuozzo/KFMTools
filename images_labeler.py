@@ -104,7 +104,7 @@ def master(folder_path):
 
     try:
         image_path = pathList[index]
-        while image_path[-4:] != ".png" and image_path[-4:] != ".jpg" and image_path[-4:] != ".jpeg":
+        while image_path[-4:] != ".png" and image_path[-4:] != ".jpg" and image_path[-5:] != ".jpeg":
             index = (index+1)%folder_size
             attempt += 1
             if attempt > 20:
@@ -114,7 +114,7 @@ def master(folder_path):
         path = os.path.join(folder_path,image_path)
     except Exception as e:
         print(e)
-        l.config(text=e)
+        #l.config(text=e)
 
     changeImageName()
 
