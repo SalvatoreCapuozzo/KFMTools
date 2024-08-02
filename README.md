@@ -4,10 +4,9 @@ Kubic FLOTAC Microscope system requires data collection and analysis in order to
 For this reason, KFM Tools have been developed. These are the functionalities provided by this toolkit:
 - Images Labeler: Label the images in a folder and save labels with YOLOv8 format
 - Camera Viewer: Concat images from scan session in order to have the chamber image
-- Samples Scanner: Load the session zip file on AI server to start the prediction
 - Results Analyzer: Get evaluation metrics by comparing results obtained with AI model with observations
 
-## Setup
+## Setup process for non-IT people
 ### Windows
 - Open the Terminal by searching “cmd” in the search bar
 - Write “python” to open the store where to get Python
@@ -24,6 +23,13 @@ For this reason, KFM Tools have been developed. These are the functionalities pr
 - Write "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py" on Terminal and launch
 - Write "rm get-pip.py" on Terminal and launch
 - Go back to the Terminal and write “pip3 install numpy”
+- Write “pip3 install Pillow”
+- Write “pip3 install paramiko”
+- Write on Terminal "python3 " and drag the file kfm_tools.py to launch the script
+
+### Linux
+- Open the Terminal
+- Write “pip3 install numpy”
 - Write “pip3 install Pillow”
 - Write “pip3 install paramiko”
 - Write on Terminal "python3 " and drag the file kfm_tools.py to launch the script
